@@ -7,7 +7,7 @@
 ----------------------------
 Для начала установим базовые пакеты которые потребуются в дальнейшем.
 
-  yum install make openssh-clients gcc libxml2 libxml2-devel libxslt libxslt-devel python-devel git
+	yum install make openssh-clients gcc libxml2 libxml2-devel libxslt libxslt-devel python-devel git
 
 2 Установка Ruby
 -----------------
