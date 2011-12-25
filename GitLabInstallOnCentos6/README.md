@@ -257,6 +257,7 @@ GitLab у меня крутиться под пользователем #gitlab.
 Если не получается зайти, то проверяем iptables.
 
 10 Nginx + thin
+---------------
 Знаю что есть passenger и passenger-install-nginx-module но насколько я понял там собирается свой nginx еще и древней версии что меня не очень устраивает.
 Запустить данную схему мне пока не удалось, точнее я ее настроил но запускается через раз.
 Вот инструкция (подразумевается что nginx уже установлен):
@@ -289,25 +290,18 @@ GitLab у меня крутиться под пользователем #gitlab.
 
 Тут есть нюанс, надо провести кое какие манипуляции с gitlab
 откроем /home/gitlab/gitlabhq/Gemfile
-и поменяем:
+и меняем строки (- ищем, + новая строка):
 
-	gem "grit", :git => "https://github.com/gitlabhq/grit.git"
+	- gem "grit", :git => "https://github.com/gitlabhq/grit.git"
+  + gem "grit"
 
-на
 
-	gem "grit"
+	- gem "gitolite", :git => "https://github.com/gitlabhq/gitolite-client.git"
+  + пem "gitolite"
 
-	gem "gitolite", :git => "https://github.com/gitlabhq/gitolite-client.git"
 
-на
-
-	gem "gitolite"
-
-	gem "annotate", :git => "https://github.com/ctran/annotate_models.git"
-
-на
-
-	gem "annotate"
+	- gem "annotate", :git => "https://github.com/ctran/annotate_models.git"
+  +gem "annotate"
 
 Переустановим:
 
