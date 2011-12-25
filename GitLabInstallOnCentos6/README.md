@@ -12,13 +12,20 @@
 -----------------
 Дело в том что в репозиториях можно найти Ruby версии 1.8.7.35 (проверить можно при помощи команды yum info ruby) а для работы GitLab требуется версия 1.9.2. Можно собрать из исходников, я же предпочел скомпилировать RPM-пакет
 Установим нужные инструменты
+
 	yum install -y readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel db4-devel byacc
+
 Установим инструменты для сборки RPM
+
 	yum install -y rpm-build rpmdevtools
+
 Создадим дерево при помощи утилиты rpmdev-setuptree
+
 	cd ~
 	rpmdev-setuptree
+
 Получим вот такую структуру
+
 	|~
 	   |-rpmbuild
 	      |---BUILD
@@ -26,24 +33,35 @@
 	      |---SOURCES
 	      |---SPECS
 	      |---SRPMS
+
 Переходим в директорию спецификаций и скачиваем
+
 	cd ~/rpmbuild/SPECS
 	curl https://raw.github.com/imeyer/ruby-1.9.2-rpm/master/ruby19.spec > ruby19.spec
 
 Проверим версию Ruby запустив команду:
+
 	cat ruby19.spec
+
 Нам нужны две первые строки, старшая и младшая версия, будет что-то типа:
+
 	%define rubyver         1.9.2
 	%define rubyminorver    p290
 
 Скачиваем нужный нам исходник:
+
 	wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p290.tar.gz > ~/rpmbuild/SOURCES
 
 Приступаем к сборке RPM пакета. Запускаем:
+
 	rpmbuild -bb ruby19.spec
+
 и идем наливать чай, кофэ, курить и т.д.
+
 Ну чтож теперь после долгого ожидания можно ставить руби.
+
 	rpm -Uhv ~/rpmbuild/RPMS/x86_64/ruby-1.9.2p290-2.el6.x86_64.rpm
+	
 Это в моем случае, если у вас другая система то смотрите ~/rpmbuild/RPMS.
 
 3. Установка дополнительных инструментов Ruby
