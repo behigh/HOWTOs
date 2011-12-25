@@ -61,117 +61,174 @@
 Ну чтож теперь после долгого ожидания можно ставить руби.
 
 	rpm -Uhv ~/rpmbuild/RPMS/x86_64/ruby-1.9.2p290-2.el6.x86_64.rpm
-	
+
 Это в моем случае, если у вас другая система то смотрите ~/rpmbuild/RPMS.
 
-3. Установка дополнительных инструментов Ruby
+3 Установка дополнительных инструментов Ruby
 ---------------------------------------------
 Обновим для начала gem
+
 	gem update --system
 
 Дабы не устанавливать документацию при установке гемов и тем самым ускорив в разы их установку, создадим файла:
+
 	vi ~/.gemrc
+
 и пропишем туда
-	install: --no-rdoc --no-ri 
+
+	install: --no-rdoc --no-ri
 	update:  --no-rdoc --no-ri
 
 Далее ставим rails:
+
 gem install rails --include-dependencies
 
-4. Подготовительная стадия
+4 Подготовительная стадия
 -------------------------
 GitLab у меня крутиться под пользователем #gitlab. Создадим данного пользователя и его директорию:
+
 	adduser --shell /bin/bash --create-home --home-dir /home/gitlab gitlab
+
 Переключимся на созданного пользователя и создадим пару ключей которая будет использована для администрирования gitolite
+
 	su gitlab
 	ssh-keygen -t rsa
 	su
 
-5. Устанавливаем Gitolite
+5 Устанавливаем Gitolite
 -------------------------
+
 	yum install gitolite
+
 Инсталляция создаст юзера gitolite и с домашним каталогом /var/lib/gitolite. Но мы его не будем использовать.
 Вместо этого создадим системного пользователя #git с домашним каталогом в /home/git
+
 	adduser --system --shell /bin/sh --comment 'gitolite' --create-home --home-dir /home/git git
+
 Скопируем публичный ключ созданный в предыдущем шаге:
+
 	cp /home/gitlab/.ssh/id_rsa.pub /home/git/gitlab.pub
+
 Переключимся на юзера git и инициализируем репозиторий с данным ключом:
+
 	su git
 	gl-setup ~/gitlab.pub
+
 После нажатия на enter о котором нас попросит процесс установки, откроется файл настроек для редактирования. Единственное что нужно тут поменять это $REPO_UMASK на 0007
+
 	$REPO_UMASK = 0007;
+
 Жмем i меняем ESC и :wq
 На этом все, репозиторий создан. Можно переключаться обратно на root.
+
 	su
+
 Присвоим пользователю #gitlab группу #git чтобы он имел доступ к репозиториям.
+
 	usermod -a -G git gitlab
+
 Назначим полные права группе для репозиториев
+
 	chmod -R g+rwX /home/git/repositories/
+
 А также права на чтение для каталога /home/git. Иначе #gitlab не сможет читать из /home/git/repositories/.
+
 	chmod g+r /home/git
 
 Подключимся из под #gitlab к git чтобы проверить доступ и сохранить настройки:
+
 	su gitlab
 	ssh git@localhost
+
 После ответа на вопросы, получим вывод:
+
 	PTY allocation request failed on channel 0
 	hello gitlab, this is gitolite v2.2-13-gf0d712e running on git 1.7.1
 	the gitolite config gives you the following access:
 	     R   W 	gitolite-admin
 	    @R_ @W_	testing
 	Connection to localhost closed.
+
 Переключимся обратно на root
+
 	su
+
 Все ок, теперь можно приступать к установке GitLab.
 
 
-6. Дополнительные инструменты
+6 Дополнительные инструменты
 -----------------------------
+
 Ставим python-pip. В репах стара версия поэтому собираем вручную как сказано в доках
+
 	curl http://python-distribute.org/distribute_setup.py | python
 	easy_install pip
+
 Далее нам надо sqlite и sqlite-devel. Первый скорее всего установлен.
+
 	yum install sqlite-devel -y
+
 Еще нам потребуется gcc-c++ компилятор.
+
 	yum install gcc-c++
+
 Устанавливаем python pygments
+
 	pip install pygments
+
 Утановим bundler, который в дальнейшем выполнит всю установку gitlab
+
 	gem install bundler
 
-7. Установка GitLab
+7 Установка GitLab
 -------------------
 Переключимся юзера gitlab и перейдем в его каталог
+
 	su gitlab
 	cd ~
+
 Клонируем gitlabhq в текущий каталог
+
 	git clone git://github.com/gitlabhq/gitlabhq.git
+
 перейдем в каталог
+
 	cd gitlabhq
+
 Тут походу требуются права root, не знаю может и сработало бы и из под root, я не стал заморачиваться и просто добавил пользователя gitlab в sudoers
 Из под root	
+
 	su
 	vi /etc/sudoers
+
 добавить строчку
+
 	gitlab    ALL=(ALL)       ALL
 
 Отказываемся от установки документации как было сказано выше:
+
 	su gitlab
 	vi ~/.gemrc
 	install: --no-rdoc --no-ri 
 	update:  --no-rdoc --no-ri
 
 Запускаем установку GitLab
+
 	su gitlab
 	bundle install
+
 После завершения установки получим:
+
 	Your bundle is complete! Use `bundle show [gemname]` to see where a bundled gem is installed.
 
-8. Настройка
+8 Настройка
 ------------
 Смотрим файл config/gitlab.yml
+
 	vi config/gitlab.yml
+
 Тут нам надо настроить доступ к gitolite. По умолчанию там такие настройки:
+
 	git_host:
 	  system: gitolite
 	  admin_uri: git@localhost:gitolite-admin
@@ -179,30 +236,41 @@ GitLab у меня крутиться под пользователем #gitlab.
 	  host: localhost
 	  git_user: git
 	  # port: 22
+
 В принципе если делали как было указано выше то ничего менять не надо.
 
 Создаем базы данных
+
 	RAILS_ENV=production rake db:setup
 	RAILS_ENV=production rake db:seed_fu
 
-9. Запуск
+9 Запуск
 ---------
+
 	thin start -p 3000 -e production
+
 Дождемся запуска, об этом даст знать строчка:
+
 	Listening on 0.0.0.0:3000, CTRL+C to stop
+
 Теперь можно открыть браузер и попробовать зайти на http://your_host:3000
 Если не получается зайти, то проверяем iptables.
 
-10. Nginx + thin
+10 Nginx + thin
 Знаю что есть passenger и passenger-install-nginx-module но насколько я понял там собирается свой nginx еще и древней версии что меня не очень устраивает.
 Запустить данную схему мне пока не удалось, точнее я ее настроил но запускается через раз.
 Вот инструкция (подразумевается что nginx уже установлен):
 из под root
+
 	thin install
 	cp /etc/rc.d/thin /etc/init.d
+
 создаем файл настроек бэкенда /etc/thin/gitlab.yml
+
 	vi /etc/thin/gitlab.yml
+
 и пишем такой вот конфиг
+
 	user: gitlab
 	group: gitlab
 	chdir: /home/gitlab/gitlabhq/
@@ -218,27 +286,37 @@ GitLab у меня крутиться под пользователем #gitlab.
 	no-epoll: true
 	servers: 1
 	daemonize: 1
+
 Тут есть нюанс, надо провести кое какие манипуляции с gitlab
 откроем /home/gitlab/gitlabhq/Gemfile
 и поменяем:
+
 	gem "grit", :git => "https://github.com/gitlabhq/grit.git"
-на 
+
+на
+
 	gem "grit"
 
 	gem "gitolite", :git => "https://github.com/gitlabhq/gitolite-client.git"
-на 
+
+на
+
 	gem "gitolite"
 
 	gem "annotate", :git => "https://github.com/ctran/annotate_models.git"
+
 на
+
 	gem "annotate"
 
 Переустановим:
+
 	su gitlab
 	cd ~/gitlabhq
 	bundle install
 
 Пробуем запустить:
+
 	service thin start
 	
 Ошибки и прочее вылавливаем в ~/gitlabhq/log/gitlabhq.thin.log
