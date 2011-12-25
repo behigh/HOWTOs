@@ -293,15 +293,15 @@ GitLab у меня крутиться под пользователем #gitlab.
 и меняем строки (- ищем, + новая строка):
 
 	- gem "grit", :git => "https://github.com/gitlabhq/grit.git"
-  + gem "grit"
+	+ gem "grit"
 
 
 	- gem "gitolite", :git => "https://github.com/gitlabhq/gitolite-client.git"
-  + пem "gitolite"
+	+ gem "gitolite"
 
 
 	- gem "annotate", :git => "https://github.com/ctran/annotate_models.git"
-  +gem "annotate"
+	+ gem "annotate"
 
 Переустановим:
 
