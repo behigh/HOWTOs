@@ -5,17 +5,58 @@
 
 1 Установка базовых пакетов
 ----------------------------
-Для начала установим базовые пакеты которые потребуются в дальнейшем.
+Для начала установим базовые пакеты, которые потребуются в дальнейшем.
 
 	yum install make openssh-clients gcc libxml2 libxml2-devel libxslt libxslt-devel python-devel git
 
 2 Установка Ruby
 -----------------
-Дело в том что в репозиториях можно найти Ruby версии 1.8.7.35 (проверить можно при помощи команды yum info ruby) а для работы GitLab требуется версия 1.9.2. Можно собрать из исходников, я же предпочел скомпилировать RPM-пакет.
+### 2.1 RVM (рекомендуемый)
+RVM — Ruby Version Manager. Программа для управления версиями Ruby. Подробнее: http://beginrescueend.com/rvm/
+
+Установим RVM:
+
+  curl -L get.rvm.io | bash -s stable
+
+Обновим среду shell:
+
+  source ~/.bash_profile
+
+После этого откройте новое окно терминала.
+
+Найти требования (выполните нижеследующею инструкцию):
+
+  rvm requirements
+
+Тут нас попросят установить список зависимостей. Copy/Past в помощь.
+
+Установим Rubby 1.9.2:
+
+  rvm install 1.9.2
+
+Зададим установленную версию как версию по умолчанию:
+
+  rvm use ruby 1.9.2 --default
+
+Полезные команды:
+
+  rvm list        # Посмотреть список установленных версий
+  rvm list known  # Посмотреть список установленных версий
+
+Работа с gemset (gem наборы):
+
+  rvm gemset list                 # список наборов
+  rvm use 1.9.2@gemset2 --create  # создать набор для Ruby 1.9.2
+  rvm use 1.9.2@gemset2 --default # использовать gemset2 как набор по умолчанию для Ruby 1.9.2
+
+
+
+### 2.2 RPM
+Дело в том, что в репозиториях можно найти Ruby версии 1.8.7.35 (проверить можно при помощи команды yum info ruby) а для работы GitLab требуется версия 1.9.2. Можно собрать из исходников, я же предпочел скомпилировать RPM-пакет.
 
 Установим нужные инструменты
 
-	yum install -y readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel db4-devel byacc
+  yum install -y readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel db4-devel byacc
 
 Установим инструменты для сборки RPM
 
@@ -60,7 +101,7 @@
 
 и идем наливать чай, кофэ, курить и т.д.
 
-Ну чтож теперь после долгого ожидания можно ставить руби.
+Ну что ж теперь после долгого ожидания можно ставить руби.
 
 	rpm -Uhv ~/rpmbuild/RPMS/x86_64/ruby-1.9.2p290-2.el6.x86_64.rpm
 
@@ -83,7 +124,7 @@
 
 Далее ставим rails:
 
-gem install rails --include-dependencies
+  gem install rails --include-dependencies
 
 4 Подготовительная стадия
 -------------------------
@@ -116,7 +157,7 @@ GitLab у меня крутиться под пользователем **gitlab
 	su git
 	gl-setup ~/gitlab.pub
 
-После нажатия на enter о котором нас попросит процесс установки, откроется файл настроек для редактирования. Единственное что нужно тут поменять это $REPO_UMASK на 0007
+После нажатия на "enter", о котором нас попросит процесс установки, откроется файл настроек для редактирования. Единственное что нужно тут поменять это $REPO_UMASK на 0007
 
 	$REPO_UMASK = 0007;
 
@@ -128,6 +169,10 @@ GitLab у меня крутиться под пользователем **gitlab
 Присвоим пользователю **gitlab** группу **git** чтобы он имел доступ к репозиториям.
 
 	usermod -a -G git gitlab
+
+[RVM Ruby install] Присвоим пользователю **gitlab** группу **rvm** чтобы on мог запускать Ruby.
+
+	usermod -a -G rvm gitlab
 
 Назначим полные права группе для репозиториев
 
@@ -168,7 +213,13 @@ GitLab у меня крутиться под пользователем **gitlab
 
 Далее нам надо sqlite и sqlite-devel. Первый скорее всего установлен.
 
-	yum install sqlite-devel -y
+	yum install sqlite sqlite-devel -y
+
+Ставим Redis. Доступен в репозиториях [CentAlt](http://centos.alt.ru/)
+
+  yum install redis -y
+  chkconfig --levels 235 redis on
+  service redis start
 
 Еще нам потребуется gcc-c++ компилятор.
 
@@ -178,9 +229,10 @@ GitLab у меня крутиться под пользователем **gitlab
 
 	pip install pygments
 
-Утановим bundler, который в дальнейшем выполнит всю установку gitlab
+Установим bundler, который в дальнейшем выполнит всю установку gitlab
 
 	gem install bundler
+
 
 7 Установка GitLab
 -------------------
@@ -197,7 +249,7 @@ GitLab у меня крутиться под пользователем **gitlab
 
 	cd gitlabhq
 
-Тут походу требуются права root, не знаю может и сработало бы и из под root, я не стал заморачиваться и просто добавил пользователя gitlab в sudoers
+[RPM Ruby install] Тут походу требуются права root, не знаю может и сработало бы и из под root, я не стал заморачиваться и просто добавил пользователя gitlab в sudoers
 Из под root	
 
 	su
@@ -219,12 +271,42 @@ GitLab у меня крутиться под пользователем **gitlab
 	su gitlab
 	bundle install
 
+[Error install: charlock_holmes] Если вываливается ошибка о невозможности установки CharlockHolmes, то:
+
+  su
+  yum install icu libicu libicu-devel
+  su gitlab
+  bundle install
+
+[Error install: mysql2] Если вываливается ошибка о невозможности установки mysql2, то:
+
+  su
+  yum install mysql-devel
+  su gitlab
+  bundle install
+
+[Error install: sqlite3] Это потому что старая версия sqlite. gem sqlite3 нуждается в версии 3.6.16+. Характерно для старых ОС Centos 5, RHEL 5. Проверьте установленный sqlite:
+
+  yum info sqlite
+
+Sqlite 3.6.20 доступен в тестовых репозиториях ATrpms. Пример установки для Centos 5/RHEL5 x86_64
+
+  su
+  rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
+  rpm -Uvh http://dl.atrpms.net/all/atrpms-repo-5-5.el5.x86_64.rpm
+  yum --enablerepo=atrpms-testing update sqlite sqlite-devel
+
+
 После завершения установки получим:
 
 	Your bundle is complete! Use `bundle show [gemname]` to see where a bundled gem is installed.
 
 8 Настройка
 ------------
+Скопируем конфигурацию
+
+  cp config/gitlab.yml.example config/gitlab.yml
+
 Смотрим файл config/gitlab.yml
 
 	vi config/gitlab.yml
@@ -240,6 +322,19 @@ GitLab у меня крутиться под пользователем **gitlab
 	  # port: 22
 
 В принципе если делали как было указано выше то ничего менять не надо.
+
+###Настройка базы данных:
+####Sqite
+
+  cp config/database.yml.sqlite config/database.yml
+
+####MySQL
+
+  sudo -u gitlab cp config/database.yml.example config/database.yml
+
+Отредактируйте настройки:
+
+  vi config/database.yml
 
 Создаем базы данных
 
@@ -290,26 +385,18 @@ GitLab у меня крутиться под пользователем **gitlab
 	servers: 1
 	daemonize: 1
 
-Тут есть нюанс, надо провести кое какие манипуляции с gitlab
-откроем /home/gitlab/gitlabhq/Gemfile
-и меняем строки (- ищем, + новая строка):
+[RVM Ruby install]
 
-	- gem "grit", :git => "https://github.com/gitlabhq/grit.git"
-	+ gem "grit"
+  rvm wrapper 1.9.2 bootup thin
+  # если меняли gemset то
+  rvm wrapper 1.9.2@<gemset> bootup thin
 
+  Правим скрипт запуска:
 
-	- gem "gitolite", :git => "https://github.com/gitlabhq/gitolite-client.git"
-	+ gem "gitolite"
+  vi /etc/init.d/thin
 
-
-	- gem "annotate", :git => "https://github.com/ctran/annotate_models.git"
-	+ gem "annotate"
-
-Переустановим:
-
-	su gitlab
-	cd ~/gitlabhq
-	bundle install
+  - DAEMON=/usr/local/rvm/gems/ruby-1.9.2-p318/bin/thin
+  + DAEMON=/usr/local/bin/bootup_thin
 
 Пробуем запустить:
 
@@ -318,6 +405,11 @@ GitLab у меня крутиться под пользователем **gitlab
 Ошибки и прочее вылавливаем в ~/gitlabhq/log/gitlabhq.thin.log
 
 В общем у меня тут проблемы в том что сокет создается через раз. Может это связано с последним коммитом автора, так как на рабочем сервере работает такая связка и никаких проблем.
+
+[UPD] В последний раз когда ставил все заработало нормально. Вот только thin не может удалить pid файл при остановке. Найти решение данной проблемы не удалось. Думаю это баг в программе.
+Пришлось заюзать костыль в /etc/init.d/thin, после остановки сервера добавил
+
+  rm -f /home/gitlab/gitlabhq/tmp/pids/gitlab.*
 
 Настройка nginx. Создаем файл /etc/nginx/conf.d/gitlab.conf
 
@@ -365,3 +457,9 @@ GitLab у меня крутиться под пользователем **gitlab
 	}
 
 Перезапускаем nginx.
+
+  service ngix reload
+
+Если все ok, то можно добавить в автозагрузку:
+
+  chkconfig --levels 235 thin on
