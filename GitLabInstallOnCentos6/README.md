@@ -16,38 +16,38 @@ RVM — Ruby Version Manager. Программа для управления в�
 
 Установим RVM:
 
-  curl -L get.rvm.io | bash -s stable
+	curl -L get.rvm.io | bash -s stable
 
 Обновим среду shell:
 
-  source ~/.bash_profile
+	source ~/.bash_profile
 
 После этого откройте новое окно терминала.
 
 Найти требования (выполните нижеследующею инструкцию):
 
-  rvm requirements
+	rvm requirements
 
 Тут нас попросят установить список зависимостей. Copy/Past в помощь.
 
 Установим Rubby 1.9.2:
 
-  rvm install 1.9.2
+	rvm install 1.9.2
 
 Зададим установленную версию как версию по умолчанию:
 
-  rvm use ruby 1.9.2 --default
+	rvm use ruby 1.9.2 --default
 
 Полезные команды:
 
-  rvm list        # Посмотреть список установленных версий
-  rvm list known  # Посмотреть список установленных версий
+	rvm list        # Посмотреть список установленных версий
+	rvm list known  # Посмотреть список установленных версий
 
 Работа с gemset (gem наборы):
 
-  rvm gemset list                 # список наборов
-  rvm use 1.9.2@gemset2 --create  # создать набор для Ruby 1.9.2
-  rvm use 1.9.2@gemset2 --default # использовать gemset2 как набор по умолчанию для Ruby 1.9.2
+	rvm gemset list                 # список наборов
+	rvm use 1.9.2@gemset2 --create  # создать набор для Ruby 1.9.2
+	rvm use 1.9.2@gemset2 --default # использовать gemset2 как набор по умолчанию для Ruby 1.9.2
 
 
 
@@ -56,7 +56,7 @@ RVM — Ruby Version Manager. Программа для управления в�
 
 Установим нужные инструменты
 
-  yum install -y readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel db4-devel byacc
+	yum install -y readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel db4-devel byacc
 
 Установим инструменты для сборки RPM
 
@@ -124,7 +124,7 @@ RVM — Ruby Version Manager. Программа для управления в�
 
 Далее ставим rails:
 
-  gem install rails --include-dependencies
+	gem install rails --include-dependencies
 
 4 Подготовительная стадия
 -------------------------
@@ -217,9 +217,9 @@ GitLab у меня крутиться под пользователем **gitlab
 
 Ставим Redis. Доступен в репозиториях [CentAlt](http://centos.alt.ru/)
 
-  yum install redis -y
-  chkconfig --levels 235 redis on
-  service redis start
+	yum install redis -y
+	chkconfig --levels 235 redis on
+	service redis start
 
 Еще нам потребуется gcc-c++ компилятор.
 
@@ -249,14 +249,12 @@ GitLab у меня крутиться под пользователем **gitlab
 
 	cd gitlabhq
 
-[RPM Ruby install] Тут походу требуются права root, не знаю может и сработало бы и из под root, я не стал заморачиваться и просто добавил пользователя gitlab в sudoers
+**[RPM Ruby install]** Тут походу требуются права root, не знаю может и сработало бы и из под root, я не стал заморачиваться и просто добавил пользователя gitlab в sudoers
 Из под root	
 
 	su
 	vi /etc/sudoers
-
-добавить строчку
-
+	# добавить строчку
 	gitlab    ALL=(ALL)       ALL
 
 Отказываемся от установки документации как было сказано выше:
@@ -271,31 +269,30 @@ GitLab у меня крутиться под пользователем **gitlab
 	su gitlab
 	bundle install
 
-[Error install: charlock_holmes] Если вываливается ошибка о невозможности установки CharlockHolmes, то:
+**[Error install: charlock_holmes]** Если вываливается ошибка о невозможности установки CharlockHolmes, то:
 
   su
   yum install icu libicu libicu-devel
   su gitlab
   bundle install
 
-[Error install: mysql2] Если вываливается ошибка о невозможности установки mysql2, то:
+**[Error install: mysql2]** Если вываливается ошибка о невозможности установки mysql2, то:
 
-  su
-  yum install mysql-devel
-  su gitlab
-  bundle install
+	su
+	yum install mysql-devel
+	su gitlab
+	bundle install
 
-[Error install: sqlite3] Это потому что старая версия sqlite. gem sqlite3 нуждается в версии 3.6.16+. Характерно для старых ОС Centos 5, RHEL 5. Проверьте установленный sqlite:
+**[Error install: sqlite3]** Это потому что старая версия sqlite. gem sqlite3 нуждается в версии 3.6.16+. Характерно для старых ОС Centos 5, RHEL 5. Проверьте установленный sqlite:
 
-  yum info sqlite
+	yum info sqlite
 
 Sqlite 3.6.20 доступен в тестовых репозиториях ATrpms. Пример установки для Centos 5/RHEL5 x86_64
 
-  su
-  rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
-  rpm -Uvh http://dl.atrpms.net/all/atrpms-repo-5-5.el5.x86_64.rpm
-  yum --enablerepo=atrpms-testing update sqlite sqlite-devel
-
+	su
+	rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
+	rpm -Uvh http://dl.atrpms.net/all/atrpms-repo-5-5.el5.x86_64.rpm
+	yum --enablerepo=atrpms-testing update sqlite sqlite-devel
 
 После завершения установки получим:
 
@@ -305,9 +302,9 @@ Sqlite 3.6.20 доступен в тестовых репозиториях ATrp
 ------------
 Скопируем конфигурацию
 
-  cp config/gitlab.yml.example config/gitlab.yml
+	cp config/gitlab.yml.example config/gitlab.yml
 
-Смотрим файл config/gitlab.yml
+Смотрим файл *config/gitlab.yml*
 
 	vi config/gitlab.yml
 
@@ -326,15 +323,15 @@ Sqlite 3.6.20 доступен в тестовых репозиториях ATrp
 ###Настройка базы данных:
 ####Sqite
 
-  cp config/database.yml.sqlite config/database.yml
+	cp config/database.yml.sqlite config/database.yml
 
 ####MySQL
 
-  sudo -u gitlab cp config/database.yml.example config/database.yml
+	sudo -u gitlab cp config/database.yml.example config/database.yml
 
 Отредактируйте настройки:
 
-  vi config/database.yml
+	vi config/database.yml
 
 Создаем базы данных
 
@@ -385,18 +382,18 @@ Sqlite 3.6.20 доступен в тестовых репозиториях ATrp
 	servers: 1
 	daemonize: 1
 
-[RVM Ruby install]
+**[RVM Ruby install]**
 
-  rvm wrapper 1.9.2 bootup thin
-  # если меняли gemset то
-  rvm wrapper 1.9.2@<gemset> bootup thin
+	rvm wrapper 1.9.2 bootup thin
+	# если меняли gemset, то:
+	rvm wrapper 1.9.2@<gemset> bootup thin
 
-  Правим скрипт запуска:
+Правим скрипт запуска:
 
-  vi /etc/init.d/thin
+	vi /etc/init.d/thin
 
-  - DAEMON=/usr/local/rvm/gems/ruby-1.9.2-p318/bin/thin
-  + DAEMON=/usr/local/bin/bootup_thin
+	- DAEMON=/usr/local/rvm/gems/ruby-1.9.2-p318/bin/thin
+	+ DAEMON=/usr/local/bin/bootup_thin
 
 Пробуем запустить:
 
@@ -406,7 +403,7 @@ Sqlite 3.6.20 доступен в тестовых репозиториях ATrp
 
 В общем у меня тут проблемы в том что сокет создается через раз. Может это связано с последним коммитом автора, так как на рабочем сервере работает такая связка и никаких проблем.
 
-[UPD] В последний раз когда ставил все заработало нормально. Вот только thin не может удалить pid файл при остановке. Найти решение данной проблемы не удалось. Думаю это баг в программе.
+**[UPD]** В последний раз когда ставил все заработало нормально. Вот только thin не может удалить pid файл при остановке. Найти решение данной проблемы не удалось. Думаю это баг в программе.
 Пришлось заюзать костыль в /etc/init.d/thin, после остановки сервера добавил
 
   rm -f /home/gitlab/gitlabhq/tmp/pids/gitlab.*
@@ -458,8 +455,8 @@ Sqlite 3.6.20 доступен в тестовых репозиториях ATrp
 
 Перезапускаем nginx.
 
-  service ngix reload
+	service ngix reload
 
 Если все ok, то можно добавить в автозагрузку:
 
-  chkconfig --levels 235 thin on
+	chkconfig --levels 235 thin on
